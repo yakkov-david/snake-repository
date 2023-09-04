@@ -1,0 +1,45 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 97vh;
+    background-color: #000;
+  }
+  
+  #game-board {
+    position: relative;
+    height: 600px;
+    width: 600px;
+    border: 1px solid #fff;
+  }
+  
+  .dot {
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+  }
+  
+  #game-over-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid black;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  button {
+    padding: 10px 20px;
+  }
+  
+  #score {
+    position: fixed;
+    top: -8px;
+    color: #fff;
+    font-size: 50px;
+   
+  }
+  
