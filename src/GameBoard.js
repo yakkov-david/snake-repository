@@ -1,5 +1,5 @@
-/*import React, { useState, useEffect } from 'react';
-import './GameBoard.css';*/
+import React, { useState, useEffect } from 'react';
+import './GameBoard.css';
 
 function GameBoard() {
   const [snake, setSnake] = useState([{ x: 15, y: 15 }]);
@@ -33,7 +33,7 @@ function GameBoard() {
           } 
           break;
         case ' ':
-          togglePause();
+          //togglePause();
           break;
         default:
           break;
