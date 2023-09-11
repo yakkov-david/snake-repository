@@ -1,1 +1,5 @@
 description of the problem:
+
+Hello,
+There is a problem with the snake game that the game restarts continuously,
+Would appreciate help.
