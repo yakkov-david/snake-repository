@@ -39,7 +39,9 @@ function GameBoard() {
           break;
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
+    
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -57,7 +59,6 @@ function GameBoard() {
 
     if (head.x < 0 || head.y < 0 || head.x >= 30 || head.y >= 30 || snake.some(dot => dot.x === head.x && dot.y === head.y)) {
       setIsGameOver(true);
-
       return;
     }
 
@@ -85,8 +86,6 @@ function GameBoard() {
     const interval = setInterval(gameLoop, parseInt(speed));
     return () => clearInterval(interval);
   }, []);
-  
-
   
 
   const restart = () => {
