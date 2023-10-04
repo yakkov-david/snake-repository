@@ -53,6 +53,7 @@ function GameBoard() {
 
   const gameLoop = () => {
     if (gamePaused) return;
+
     
     
     let head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
@@ -62,7 +63,17 @@ function GameBoard() {
       return;
     }
 
-    let newSnake = [head, ...snake];
+    let newSnake = [head, ...snake];// A head is added to the snake array;
+      
+      /* the line of code takes a value (or object) head 
+      and puts it at the beginning of a new array. 
+      It then appends all the individual elements of the snake array 
+      to this new array, resulting in the newSnake array.*/
+
+      /* '...snake':
+      This is the spread syntax (...). 
+      It's used to spread the elements of an existing array (or object) 
+      into a new array (or object).*/
     
     if (apple && apple.x === head.x && apple.y === head.y) {
       const newScore = score + parseInt(speed);
@@ -84,6 +95,7 @@ function GameBoard() {
 
   useEffect(() => {
     const interval = setInterval(gameLoop, parseInt(speed));
+    
     return () => clearInterval(interval);
   }, []);
   
@@ -110,10 +122,16 @@ function GameBoard() {
       <div id="game-board">
         {snake.map((segment, index) => (
         <div key={index} className="dot" style={{ left: `${segment.x * 20}px`, top: `${segment.y * 20}px`, backgroundColor: snakeColor }}></div>
+          /* This mapping process essentially draws the snake on the game board. 
+            Each segment of the snake is represented by a <div> positioned 
+            according to its coordinates (x and y). The entire snake 
+            is thus a series of these <div> elements displayed next to each other,
+            giving the appearance of a continuous entity moving on the game board.
+          */
         ))}
         {apple && <div className="dot" style={{ left: `${apple.x * 20}px`, top: `${apple.y * 20}px`, backgroundColor: appleColor }}></div>}
       </div>
-
+  
       <div id="game-over-popup" style={{ display: isGameOver ? 'block' : 'none' }}>
         <h2>Game Over</h2>
         <p>Your score: <span>{score}</span></p>
@@ -131,6 +149,13 @@ function GameBoard() {
       <div id="score">Score: {score}</div>
     </div>
   );
+  
+  // Remarks:
+
+  /* Clearing the previous positions of the snake is done by React
+   which renders the component every time;
+  */
+
 }
 
 export default GameBoard;
