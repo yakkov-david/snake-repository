@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './GameBoard.css';
 
+
 function GameBoard() {
+  //console.log('GameBoard mounted');
   const [snake, setSnake] = useState([{ x: 15, y: 15 }]);
   const [direction, setDirection] = useState({ x: 0, y: -1 });
   const [apple, setApple] = useState(null);
@@ -13,6 +15,7 @@ function GameBoard() {
   const [appleColor, setAppleColor] = useState("red");
 
   useEffect(() => {
+    //console.log('GameBoard mounted');
     const handleKeyDown = (e) => {
       switch (e.key) {
         case 'ArrowUp':
@@ -51,8 +54,15 @@ function GameBoard() {
     setGamePaused(prevGamePaused => !prevGamePaused);
   };
 
+  /*const handleSpeedChange = (e) => {
+    setGamePaused(true);
+    setSpeed(e.target.value);
+  };*/
+
+
   const gameLoop = () => {
     if (gamePaused) return;
+    //console.log('GameBoard mounted');
 
     
     
@@ -77,6 +87,7 @@ function GameBoard() {
     
     if (apple && apple.x === head.x && apple.y === head.y) {
       const newScore = score + parseInt(speed);
+      
       setScore(newScore);
       setApple(null);
       setSnakeColor(appleColor);
@@ -95,7 +106,7 @@ function GameBoard() {
 
   useEffect(() => {
     const interval = setInterval(gameLoop, parseInt(speed));
-    
+    //console.log('GameBoard mounted');
     return () => clearInterval(interval);
   }, []);
   
