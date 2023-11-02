@@ -1,3 +1,3 @@
 Game mode:
 
-Bug- The game restarts every moment.
+Bug- The position of the snake is not updated visually;
