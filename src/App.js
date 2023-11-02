@@ -1,12 +1,13 @@
 
 import React from 'react';
-import GameBoard from './GameBoard.js';
+//import GameBoard from './GameBoard.js';
+import GameBoardCopy from './GameBoard copy.js';
 
 
 function App() {
   return (
     <div className="App">
-      <GameBoard />
+      <GameBoardCopy />
     </div>
   );
 }
