@@ -36,10 +36,13 @@ body {
   }
   
   #score {
-    position: fixed;
-    top: -8px;
+    position: absolute; /* Changed from fixed to absolute */
+    top: 0;             /* Adjusted to 0 so it is at the top */
+    left: 50%;          /* Center horizontally */
+    transform: translateX(-50%); /* Adjust to precisely center the score */
     color: #fff;
-    font-size: 50px;
-   
-  }
+    font-size: 24px; /* Reduced font size to fit the score properly */
+    z-index: 10; /* Ensure score is above the game board if needed */
+}
+
   

@@ -1,124 +1,178 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './GameBoard.css';
 
-
 function GameBoard() {
-  //console.log('GameBoard mounted');
-  const [snake, setSnake] = useState([{ x: 15, y: 15 }]);
-  const [direction, setDirection] = useState({ x: 0, y: -1 });
-  const [apple, setApple] = useState(null);
   const [score, setScore] = useState(0);
-  const [gamePaused, setGamePaused] = useState(false);
-  const [speed, setSpeed] = useState('200');
   const [isGameOver, setIsGameOver] = useState(false);
-  const [snakeColor, setSnakeColor] = useState("#fff");
-  const [appleColor, setAppleColor] = useState("red");
+  const [speed, setSpeed] = useState(200);
+  const [renderTrigger, setRenderTrigger] = useState(0); // Added state to trigger re-renders
+
+  const snakeRef = useRef([{ x: 15, y: 15 }]);
+  const directionRef = useRef({ x: 0, y: -1 });
+  const appleRef = useRef(null);
+  const gamePausedRef = useRef(false);
+  const snakeColorRef = useRef("#fff");
+  const appleColorRef = useRef("red");
+  const gameLoopRef = useRef(null); // To hold the game loop timeout/interval
 
   useEffect(() => {
-    //console.log('GameBoard mounted');
-    const handleKeyDown = (e) => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isGameOver]); // Dependency ensures event listener is managed correctly
+
+  /*useEffect(() => {
+
+    return () => {
+      // Clears the game loop interval when the component unmounts
+      if (gameLoopRef.current) {
+        clearTimeout(gameLoopRef.current);
+      }
+    };
+  }, []); // Empty array ensures this effect runs once on mount and on unmount
+  */
+
+  useEffect(() => {
+    const handleKeyUp = (e) => {
+      if (e.key === 'Enter' && isGameOver) {
+        restart(); // Restart the game if Enter is pressed and the game is over
+      }
+    };
+
+    window.addEventListener('keyup', handleKeyUp); // Add keyup event listener
+
+    // Return a cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [isGameOver]); // Only re-run if isGameOver changes
+
+  const generateApplePosition = () => {
+    let newApple;
+    do {
+      newApple = {
+        x: Math.floor(Math.random() * 30),
+        y: Math.floor(Math.random() * 30),
+      };
+    } while (snakeRef.current.some(segment => segment.x === newApple.x && segment.y === newApple.y));
+    return newApple;
+  };
+
+  const handleKeyDown = (e) => {
+    if (!isGameOver) {
       switch (e.key) {
         case 'ArrowUp':
-          if (direction.y !== 1) setDirection({ x: 0, y: -1 });
+          if (directionRef.current.y !== 1) directionRef.current = { x: 0, y: -1 };
           break;
         case 'ArrowDown':
-          if (direction.y !== -1) setDirection({ x: 0, y: 1 });
+          if (directionRef.current.y !== -1) directionRef.current = { x: 0, y: 1 };
           break;
         case 'ArrowLeft':
-          if (direction.x !== 1) setDirection({ x: -1, y: 0 });
+          if (directionRef.current.x !== 1) directionRef.current = { x: -1, y: 0 };
           break;
         case 'ArrowRight':
-          if (direction.x !== -1) setDirection({ x: 1, y: 0 });
+          if (directionRef.current.x !== -1) directionRef.current = { x: 1, y: 0 };
           break;
         case 'Enter':
-          if (isGameOver){
+          if (isGameOver) {
             restart();
-          } 
+          }
           break;
         case ' ':
-          togglePause();
+          if (!isGameOver) {
+            gamePausedRef.current = !gamePausedRef.current;
+            if (!gamePausedRef.current) {
+              gameLoop(); // Resume the game if it's not paused anymore
+            }
+          }
           break;
         default:
           break;
       }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [direction, isGameOver]);
-
-  const togglePause = () => {
-    setGamePaused(prevGamePaused => !prevGamePaused);
+    }
   };
 
-  /*const handleSpeedChange = (e) => {
-    setGamePaused(true);
-    setSpeed(e.target.value);
-  };*/
-
+  // Create a function to handle scoring based on difficulty level
+  const handleScoring = () => {
+    let points;
+    switch (speed) {
+      case 200: // Easy
+        points = 2;
+        break;
+      case 150: // Medium
+        points = 4;
+        break;
+      case 100: // Hard
+        points = 6;
+        break;
+      default:
+        points = 2; // Default to Easy if for some reason none of the above matches
+    }
+    setScore(prev => prev + points);
+  };
 
   const gameLoop = () => {
-    if (gamePaused) return;
-    //console.log('GameBoard mounted');
+    if (gamePausedRef.current || isGameOver) return;
 
-    
-    
-    let head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+    let snake = snakeRef.current;
+    let newDirection = directionRef.current;
+    let head = { x: snake[0].x + newDirection.x, y: snake[0].y + newDirection.y };
 
-    if (head.x < 0 || head.y < 0 || head.x >= 30 || head.y >= 30 || snake.some(dot => dot.x === head.x && dot.y === head.y)) {
+    // Check for game over conditions
+    if (head.x < 0 || head.y < 0 || head.x >= 30 || head.y >= 30 || snake.some(segment => segment.x === head.x && segment.y === head.y)) {
       setIsGameOver(true);
       return;
     }
 
-    let newSnake = [head, ...snake];// A head is added to the snake array;
-      
-      /* the line of code takes a value (or object) head 
-      and puts it at the beginning of a new array. 
-      It then appends all the individual elements of the snake array 
-      to this new array, resulting in the newSnake array.*/
+    let newSnake = [head, ...snake];
 
-      /* '...snake':
-      This is the spread syntax (...). 
-      It's used to spread the elements of an existing array (or object) 
-      into a new array (or object).*/
-    
-    if (apple && apple.x === head.x && apple.y === head.y) {
-      const newScore = score + parseInt(speed);
-      
-      setScore(newScore);
-      setApple(null);
-      setSnakeColor(appleColor);
-      setAppleColor(getRandomColor());
-    } 
-    else {
-      newSnake.pop();
+    // Check if apple is eaten
+    if (appleRef.current && appleRef.current.x === head.x && appleRef.current.y === head.y) {
+      handleScoring(); // Adjusted to use the new handleScoring function
+      appleRef.current = null;
+      snakeColorRef.current = appleColorRef.current;
+      appleColorRef.current = getRandomColor();
+    } else {
+      newSnake.pop(); // Remove the tail segment
     }
 
-    if (!apple) {
-      setApple({ x: Math.floor(Math.random() * 30), y: Math.floor(Math.random() * 30) });
+    // Create new apple if it doesn't exist
+    if (!appleRef.current) {
+      appleRef.current = generateApplePosition(); // Use the new function to get a valid apple position
     }
 
-    setSnake(newSnake);
+    snakeRef.current = newSnake;
+    setRenderTrigger(rt => rt + 1); // Trigger a re-render
+
+
+    // Continue the game loop
+    gameLoopRef.current = setTimeout(gameLoop, speed);
   };
 
-  useEffect(() => {
-    const interval = setInterval(gameLoop, parseInt(speed));
-    //console.log('GameBoard mounted');
-    return () => clearInterval(interval);
-  }, []);
-  
+  const startGame = () => {
+    gameLoop();
+  };
+
+  const startGameAndRemoveFocus = () => {
+    startGame();
+    document.activeElement.blur(); // Blur the active element to remove focus
+  };
 
   const restart = () => {
-    setSnake([{ x: 15, y: 15 }]);
-    setDirection({ x: 0, y: -1 });
-    setApple(null);
+    snakeRef.current = [{ x: 15, y: 15 }];
+    directionRef.current = { x: 0, y: -1 };
+    appleRef.current = null;
     setScore(0);
-    setSnakeColor("#fff");
-    setAppleColor("red");
+    snakeColorRef.current = "#fff";
+    appleColorRef.current = "red";
     setIsGameOver(false);
+    gamePausedRef.current = false;
+    if (gameLoopRef.current) {
+      clearTimeout(gameLoopRef.current);
+    }
+    setRenderTrigger(0); // Reset render trigger for a new game
+    startGame(); // Restart the game loop
   };
 
   const getRandomColor = () => {
@@ -131,18 +185,12 @@ function GameBoard() {
   return (
     <div>
       <div id="game-board">
-        {snake.map((segment, index) => (
-        <div key={index} className="dot" style={{ left: `${segment.x * 20}px`, top: `${segment.y * 20}px`, backgroundColor: snakeColor }}></div>
-          /* This mapping process essentially draws the snake on the game board. 
-            Each segment of the snake is represented by a <div> positioned 
-            according to its coordinates (x and y). The entire snake 
-            is thus a series of these <div> elements displayed next to each other,
-            giving the appearance of a continuous entity moving on the game board.
-          */
+        {snakeRef.current.map((segment, index) => (
+          <div key={index} className="dot" style={{ left: `${segment.x * 20}px`, top: `${segment.y * 20}px`, backgroundColor: snakeColorRef.current }}></div>
         ))}
-        {apple && <div className="dot" style={{ left: `${apple.x * 20}px`, top: `${apple.y * 20}px`, backgroundColor: appleColor }}></div>}
+        {appleRef.current && <div className="dot" style={{ left: `${appleRef.current.x * 20}px`, top: `${appleRef.current.y * 20}px`, backgroundColor: appleColorRef.current }}></div>}
       </div>
-  
+
       <div id="game-over-popup" style={{ display: isGameOver ? 'block' : 'none' }}>
         <h2>Game Over</h2>
         <p>Your score: <span>{score}</span></p>
@@ -150,23 +198,20 @@ function GameBoard() {
       </div>
 
       <div id="difficulty-level">
-        <select value={speed} onChange={e => setSpeed(e.target.value)}>
+        <select value={speed} onChange={e => setSpeed(parseInt(e.target.value))}>
           <option value="200">Easy</option>
           <option value="150">Medium</option>
           <option value="100">Hard</option>
         </select>
       </div>
 
+      <div id="difficulty-level">
+        <button onClick={startGameAndRemoveFocus}>Start Game</button>
+      </div>
+
       <div id="score">Score: {score}</div>
     </div>
   );
-  
-  // Remarks:
-
-  /* Clearing the previous positions of the snake is done by React
-   which renders the component every time;
-  */
-
 }
 
 export default GameBoard;
